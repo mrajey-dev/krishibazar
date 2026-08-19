@@ -1,0 +1,42 @@
+{
+  "name": "krishibazar",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@expo/cli": "^57.0.16",
+    "@expo/vector-icons": "^15.1.1",
+    "abort-controller": "^3.0.0",
+    "canvas-confetti": "^1.9.4",
+    "expo": "^57.0.14",
+    "expo-linking": "^57.0.6",
+    "expo-status-bar": "^57.0.1",
+    "lucide-react": "^1.16.0",
+    "lucide-react-native": "^1.33.0",
+    "memoize-one": "^6.0.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.2",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.19.13"
+  },
+  "devDependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^22.13.9",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.3",
+    "vite": "^6.2.0"
+  }
+}
