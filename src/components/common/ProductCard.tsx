@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Product } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -7,21 +7,31 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface ProductCardProps {
   product: Product;
+  compact?: boolean;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { language, t } = useLanguage();
-  const { navigateTo, isProductSaved, toggleSaveProduct, openContactModal } = useMarketplace();
+  const { navigateTo, isProductSaved, toggleSaveProduct, addToCart } = useMarketplace();
+  const [addedAnimation, setAddedAnimation] = useState(false);
 
   const isSaved = isProductSaved(product.id);
   const displayTitle = language === 'mr' ? (product.titleMr || product.titleHi) : language === 'hi' ? product.titleHi : product.title;
   const displayUnit = language === 'mr' ? (product.unitMr || product.unitHi) : language === 'hi' ? product.unitHi : product.unit;
 
-  const getUrgentText = () => (language === 'mr' ? 'तातडीचे' : language === 'hi' ? 'जरूरी' : 'URGENT');
-  const getOrganicText = () => (language === 'mr' ? 'सेंद्रिय' : language === 'hi' ? 'जैविक' : 'ORGANIC');
-  const getCertifiedText = () => (language === 'mr' ? 'प्रमाणित' : language === 'hi' ? 'प्रमाणित' : 'CERTIFIED');
-  const getNegoText = () => (language === 'mr' ? 'वाटाघाटी' : language === 'hi' ? 'मोलभाव' : 'Nego.');
-  const getCallText = () => (language === 'mr' ? 'कॉल' : language === 'hi' ? 'कॉल' : 'Call');
+  const handleCartPress = (e: any) => {
+    e?.stopPropagation?.();
+    addToCart(product, 1);
+    setAddedAnimation(true);
+    setTimeout(() => setAddedAnimation(false), 1800);
+  };
+
+  const getConditionText = () => {
+    if (product.isUrgent) return language === 'mr' ? 'तातडीचे' : language === 'hi' ? 'जरूरी' : 'URGENT';
+    if (product.organicCertified) return language === 'mr' ? '🌿 सेंद्रिय' : language === 'hi' ? '🌿 जैविक' : '🌿 Organic';
+    if (product.conditionLabelEn) return language === 'hi' ? product.conditionLabelHi : language === 'mr' && product.conditionLabelMr ? product.conditionLabelMr : product.conditionLabelEn;
+    return language === 'mr' ? 'खात्रीशीर' : 'Verified';
+  };
 
   return (
     <TouchableOpacity
@@ -29,7 +39,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onPress={() => navigateTo({ name: 'product_detail', productId: product.id })}
       activeOpacity={0.88}
     >
-      {/* Image & Badges */}
+      {/* 1. Product Image & Overlays */}
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: product.images[0] }}
@@ -37,39 +47,42 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           resizeMode="cover"
         />
 
-        {/* Tag Pill */}
-        {product.isUrgent && (
-          <View style={[styles.tagPill, { backgroundColor: '#EF4444' }]}>
-            <Text style={styles.tagText}>{getUrgentText()}</Text>
-          </View>
-        )}
-        {!product.isUrgent && product.organicCertified && (
-          <View style={[styles.tagPill, { backgroundColor: '#059669' }]}>
-            <Text style={styles.tagText}>{getOrganicText()}</Text>
-          </View>
-        )}
-        {!product.isUrgent && !product.organicCertified && product.condition === 'certified_seed' && (
-          <View style={[styles.tagPill, { backgroundColor: '#2563EB' }]}>
-            <Text style={styles.tagText}>{getCertifiedText()}</Text>
-          </View>
-        )}
+        {/* Condition / Quality Tag */}
+        <View style={[
+          styles.tagPill,
+          product.isUrgent ? { backgroundColor: '#EF4444' } : { backgroundColor: '#15803D' }
+        ]}>
+          <Text style={styles.tagText} numberOfLines={1}>
+            {getConditionText()}
+          </Text>
+        </View>
 
-        {/* Floating Heart Button */}
+        {/* Rating Badge */}
+        <View style={styles.ratingBadge}>
+          <Ionicons name="star" size={10} color="#EAB308" />
+          <Text style={styles.ratingText}>{product.seller.rating || 4.8}</Text>
+        </View>
+
+        {/* Floating Heart / Wishlist Button */}
         <TouchableOpacity
           style={[styles.heartBtn, isSaved && styles.heartBtnSaved]}
-          onPress={() => toggleSaveProduct(product.id)}
+          onPress={(e) => {
+            e?.stopPropagation?.();
+            toggleSaveProduct(product.id);
+          }}
           activeOpacity={0.8}
         >
           <Ionicons
             name={isSaved ? 'heart' : 'heart-outline'}
-            size={16}
-            color={isSaved ? '#EF4444' : '#4B5563'}
+            size={14}
+            color={isSaved ? '#EF4444' : '#475569'}
           />
         </TouchableOpacity>
       </View>
 
-      {/* Card Content */}
+      {/* 2. Product Information Content */}
       <View style={styles.cardBody}>
+        {/* Product Name */}
         <Text style={styles.productTitle} numberOfLines={2}>
           {displayTitle}
         </Text>
@@ -78,39 +91,33 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <View style={styles.priceRow}>
           <Text style={styles.priceCurrency}>₹{product.price.toLocaleString()}</Text>
           <Text style={styles.priceUnit}>/{displayUnit}</Text>
-          {product.isNegotiable && (
-            <View style={styles.negoBadge}>
-              <Text style={styles.negoText}>{getNegoText()}</Text>
-            </View>
-          )}
         </View>
 
-        {/* Location */}
+        {/* Seller & Location */}
         <View style={styles.locationRow}>
-          <Ionicons name="location" size={11} color="#16A34A" />
+          <Ionicons name="location-sharp" size={11} color="#16A34A" />
           <Text style={styles.locationText} numberOfLines={1}>
-            {product.location.village}, {product.location.district}
+            {product.location.district || product.location.village} {product.location.distanceKm ? `• ${product.location.distanceKm} km` : ''}
           </Text>
         </View>
 
-        {/* Seller Info & Call Mini Button */}
-        <View style={styles.sellerRow}>
-          <View style={styles.sellerInfo}>
-            <Image source={{ uri: product.seller.avatar }} style={styles.sellerAvatar} />
-            <Text style={styles.sellerName} numberOfLines={1}>
-              {product.seller.name}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.callMiniBtn}
-            onPress={() => openContactModal(product)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="call" size={10} color="#15803D" />
-            <Text style={styles.callMiniText}>{getCallText()}</Text>
-          </TouchableOpacity>
-        </View>
+        {/* 3. Add to Cart Button */}
+        <TouchableOpacity
+          style={[styles.addToCartBtn, addedAnimation && styles.addToCartBtnAdded]}
+          onPress={handleCartPress}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name={addedAnimation ? 'checkmark-circle' : 'cart-outline'}
+            size={13}
+            color={addedAnimation ? '#15803D' : '#FFFFFF'}
+          />
+          <Text style={[styles.addToCartText, addedAnimation && styles.addToCartTextAdded]}>
+            {addedAnimation
+              ? (language === 'hi' ? 'कार्ट में जोड़ा!' : language === 'mr' ? 'जोडले!' : 'Added!')
+              : t('addToCart')}
+          </Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -119,21 +126,21 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    margin: 5,
+    margin: 4,
     backgroundColor: '#FFFFFF',
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowColor: '#15803D',
+    shadowOffset: { width: 0, height: 1.5 },
+    shadowOpacity: 0.06,
     shadowRadius: 3,
   },
   imageContainer: {
-    height: 125,
-    backgroundColor: '#E5E7EB',
+    height: 104,
+    backgroundColor: '#F1F5F9',
     position: 'relative',
   },
   productImage: {
@@ -142,119 +149,112 @@ const styles = StyleSheet.create({
   },
   tagPill: {
     position: 'absolute',
-    top: 6,
-    left: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
+    top: 5,
+    left: 5,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    maxWidth: 90,
   },
   tagText: {
     color: '#FFFFFF',
+    fontSize: 8.5,
+    fontWeight: '800',
+  },
+  ratingBadge: {
+    position: 'absolute',
+    bottom: 5,
+    left: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    paddingHorizontal: 4,
+    paddingVertical: 1.5,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+    borderWidth: 0.8,
+    borderColor: '#FEF08A',
+    elevation: 1,
+  },
+  ratingText: {
     fontSize: 9,
     fontWeight: '800',
+    color: '#854D0E',
   },
   heartBtn: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    top: 5,
+    right: 5,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.92)',
     alignItems: 'center',
     justifyContent: 'center',
+    elevation: 1,
   },
   heartBtnSaved: {
     backgroundColor: '#FEE2E2',
   },
   cardBody: {
-    padding: 8,
+    padding: 7,
   },
   productTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
-    lineHeight: 16,
-    height: 32,
-    marginBottom: 4,
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#0F172A',
+    lineHeight: 14.5,
+    height: 29,
+    marginBottom: 2,
   },
   priceRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 4,
-    gap: 3,
+    gap: 2,
+    marginBottom: 2,
   },
   priceCurrency: {
-    fontSize: 14,
+    fontSize: 13.5,
     fontWeight: '800',
     color: '#15803D',
   },
   priceUnit: {
-    fontSize: 10,
-    color: '#6B7280',
+    fontSize: 9.5,
+    color: '#64748B',
     fontWeight: '600',
-  },
-  negoBadge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 4,
-    marginLeft: 'auto',
-  },
-  negoText: {
-    color: '#92400E',
-    fontSize: 8.5,
-    fontWeight: '800',
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 2,
     marginBottom: 6,
   },
   locationText: {
-    fontSize: 10,
-    color: '#6B7280',
-    flex: 1,
-  },
-  sellerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-    paddingTop: 6,
-  },
-  sellerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flex: 1,
-    marginRight: 4,
-  },
-  sellerAvatar: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-  },
-  sellerName: {
     fontSize: 9.5,
-    color: '#4B5563',
+    color: '#475569',
     fontWeight: '600',
     flex: 1,
   },
-  callMiniBtn: {
-    backgroundColor: '#DCFCE7',
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 12,
+  addToCartBtn: {
+    backgroundColor: '#16A34A',
+    paddingVertical: 5.5,
+    borderRadius: 7,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 3,
   },
-  callMiniText: {
-    fontSize: 9.5,
-    fontWeight: '700',
+  addToCartBtnAdded: {
+    backgroundColor: '#DCFCE7',
+    borderWidth: 1,
+    borderColor: '#86EFAC',
+  },
+  addToCartText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  addToCartTextAdded: {
     color: '#15803D',
   },
 });

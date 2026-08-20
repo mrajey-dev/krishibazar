@@ -33,8 +33,23 @@ export const CategoryScreen: React.FC<CategoryScreenProps> = ({ categoryId, init
     if (selectedSubCategory !== 'all' && p.subCategory !== selectedSubCategory) return false;
     if (onlyOrganic && !p.organicCertified) return false;
     if (onlyVerified && !p.seller.isVerified) return false;
-    if (selectedLocation.district !== 'All Districts') {
-      return p.location.district.toLowerCase() === selectedLocation.district.toLowerCase();
+    if (selectedLocation.state && selectedLocation.state !== 'All India') {
+      if (p.location.state.toLowerCase() !== selectedLocation.state.toLowerCase()) return false;
+    }
+    if (selectedLocation.district && selectedLocation.district !== 'All Districts') {
+      if (p.location.district.toLowerCase() !== selectedLocation.district.toLowerCase()) return false;
+    }
+    if (selectedLocation.taluka && selectedLocation.taluka !== 'All Talukas') {
+      const talukaQuery = selectedLocation.taluka.toLowerCase().split(' ')[0].replace(/[^a-z]/g, '');
+      const matchTehsil = p.location.tehsil.toLowerCase().includes(talukaQuery);
+      const matchVillage = p.location.village.toLowerCase().includes(talukaQuery);
+      const matchMandi = (p.seller.mandiDistance || '').toLowerCase().includes(talukaQuery);
+      if (!matchTehsil && !matchVillage && !matchMandi) {
+        // If not found in taluka, allow district match if available
+        if (p.location.district.toLowerCase() !== selectedLocation.district.toLowerCase()) {
+          return false;
+        }
+      }
     }
     return true;
   });
@@ -67,10 +82,10 @@ export const CategoryScreen: React.FC<CategoryScreenProps> = ({ categoryId, init
           </TouchableOpacity>
           <View>
             <Text style={styles.headerTitle}>
-              {language === 'hi' ? categoryMeta?.nameHi : categoryMeta?.nameEn}
+              {language === 'mr' && categoryMeta?.nameMr ? categoryMeta.nameMr : language === 'hi' ? categoryMeta?.nameHi : categoryMeta?.nameEn}
             </Text>
             <Text style={styles.headerCount}>
-              {filtered.length} {language === 'hi' ? 'सामान उपलब्ध' : 'items available'}
+              {filtered.length} {language === 'hi' ? 'सामान उपलब्ध' : language === 'mr' ? 'वस्तू उपलब्ध' : 'items available'}
             </Text>
           </View>
         </View>
@@ -98,7 +113,7 @@ export const CategoryScreen: React.FC<CategoryScreenProps> = ({ categoryId, init
             style={[styles.catTab, selectedCategory === cat.id && styles.catTabActive]}
           >
             <Text style={[styles.catTabText, selectedCategory === cat.id && styles.catTabTextActive]}>
-              {language === 'hi' ? cat.nameHi : cat.nameEn}
+              {language === 'mr' && cat.nameMr ? cat.nameMr : language === 'hi' ? cat.nameHi : cat.nameEn}
             </Text>
           </TouchableOpacity>
         ))}

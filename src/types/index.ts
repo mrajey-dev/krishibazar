@@ -1,8 +1,19 @@
 export type ProductCategory = 
   | 'all'
+  | 'plants_seedlings'
+  | 'fodder_maize'
+  | 'onion_seedlings'
+  | 'chilli_seedlings'
+  | 'cabbage_seedlings'
+  | 'tomato_seedlings'
   | 'seeds'
-  | 'machinery'
   | 'fertilizers'
+  | 'animal_feed'
+  | 'farming_equipment'
+  | 'crop_protection'
+  | 'nursery_plants'
+  | 'other_agri'
+  | 'machinery'
   | 'pesticides'
   | 'crops'
   | 'livestock'
@@ -14,6 +25,8 @@ export interface CategoryInfo {
   nameHi: string;
   nameMr?: string;
   iconName: string;
+  emoji: string;
+  image: string;
   color: string;
   bgColor: string;
   count: number;
@@ -32,6 +45,7 @@ export interface SellerInfo {
   district: string;
   state: string;
   mandiDistance: string;
+  distanceKm?: number;
   rating: number;
   totalDeals: number;
   memberSince: string;
@@ -86,10 +100,12 @@ export interface Product {
     state: string;
     pincode: string;
     landmark?: string;
+    distanceKm?: number;
   };
   tags: string[];
   isFeatured?: boolean;
   isUrgent?: boolean;
+  isPopular?: boolean;
   viewsCount: number;
   postedDate: string;
   organicCertified?: boolean;
@@ -107,11 +123,59 @@ export interface FilterState {
   maxPrice?: number;
   state?: string;
   district?: string;
+  taluka?: string;
   condition?: string;
   organicOnly?: boolean;
   verifiedOnly?: boolean;
   searchQuery?: string;
   sortBy: 'featured' | 'price_low' | 'price_high' | 'newest' | 'distance';
+}
+
+export interface FarmerUser {
+  id: string;
+  name: string;
+  phone: string;
+  kisanId: string;
+  state: string;
+  district: string;
+  taluka?: string;
+  village: string;
+  avatar?: string;
+  isVerified: boolean;
+  farmType: string;
+  landSize?: string;
+  memberSince: string;
+  totalDeals: number;
+  rating: number;
+  pin?: string;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+  selectedAt: string;
+}
+
+export interface OrderItem {
+  id: string;
+  product: Product;
+  quantity: number;
+  totalPrice: number;
+  status: 'confirmed' | 'connected_with_seller' | 'delivered' | 'cancelled';
+  orderDate: string;
+  sellerPhone: string;
+  sellerName: string;
+  deliveryMethod: 'pickup_at_mandi' | 'direct_farm_visit' | 'seller_delivery';
+}
+
+export interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  isRead: boolean;
+  type: 'mandi_rate' | 'order' | 'deal' | 'alert';
+  icon: string;
 }
 
 export type ScreenType = 
@@ -123,6 +187,12 @@ export type ScreenType =
   | { name: 'saved' }
   | { name: 'my_listings' }
   | { name: 'search'; initialQuery?: string }
-  | { name: 'safety_guide' };
+  | { name: 'safety_guide' }
+  | { name: 'login'; redirectScreen?: ScreenType }
+  | { name: 'account' }
+  | { name: 'cart' }
+  | { name: 'orders' };
 
 export type Language = 'en' | 'hi' | 'mr';
+
+

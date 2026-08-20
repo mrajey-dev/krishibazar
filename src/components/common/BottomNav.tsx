@@ -1,18 +1,28 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useLanguage } from '../../context/LanguageContext';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useAuth } from '../../context/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 export const BottomNav: React.FC = () => {
   const { t } = useLanguage();
-  const { currentScreen, navigateTo, savedProductIds, myProductIds } = useMarketplace();
+  const { currentScreen, navigateTo, cartCount, orders } = useMarketplace();
+  const { isAuthenticated, currentUser } = useAuth();
 
   const activeTab = currentScreen.name;
 
+  const handleProfilePress = () => {
+    if (isAuthenticated) {
+      navigateTo({ name: 'account' });
+    } else {
+      navigateTo({ name: 'login' });
+    }
+  };
+
   return (
     <View style={styles.navBar}>
-      {/* Home Tab */}
+      {/* 1. Home Tab */}
       <TouchableOpacity
         style={styles.tabItem}
         onPress={() => navigateTo({ name: 'home' })}
@@ -20,7 +30,7 @@ export const BottomNav: React.FC = () => {
       >
         <Ionicons
           name={activeTab === 'home' ? 'home' : 'home-outline'}
-          size={22}
+          size={24}
           color={activeTab === 'home' ? '#16A34A' : '#6B7280'}
         />
         <Text style={[styles.tabLabel, activeTab === 'home' && styles.tabLabelActive]}>
@@ -28,62 +38,77 @@ export const BottomNav: React.FC = () => {
         </Text>
       </TouchableOpacity>
 
-      {/* Categories Tab */}
+      {/* 2. Search Tab */}
       <TouchableOpacity
         style={styles.tabItem}
-        onPress={() => navigateTo({ name: 'category', categoryId: 'all' })}
+        onPress={() => navigateTo({ name: 'search' })}
         activeOpacity={0.7}
       >
         <Ionicons
-          name={activeTab === 'category' ? 'grid' : 'grid-outline'}
-          size={22}
-          color={activeTab === 'category' ? '#16A34A' : '#6B7280'}
+          name={activeTab === 'search' ? 'search' : 'search-outline'}
+          size={24}
+          color={activeTab === 'search' ? '#16A34A' : '#6B7280'}
         />
-        <Text style={[styles.tabLabel, activeTab === 'category' && styles.tabLabelActive]}>
-          {t('allCategories')}
+        <Text style={[styles.tabLabel, activeTab === 'search' && styles.tabLabelActive]}>
+          {t('search')}
         </Text>
       </TouchableOpacity>
 
-      {/* Sell Floating Action Button */}
-      <TouchableOpacity
-        style={styles.sellBtn}
-        onPress={() => navigateTo({ name: 'sell' })}
-        activeOpacity={0.85}
-      >
-        <Ionicons name="add" size={28} color="#FFFFFF" />
-      </TouchableOpacity>
-
-      {/* Saved / Favorites Tab */}
+      {/* 3. Orders Tab */}
       <TouchableOpacity
         style={styles.tabItem}
-        onPress={() => navigateTo({ name: 'saved' })}
+        onPress={() => navigateTo({ name: 'orders' })}
         activeOpacity={0.7}
       >
-        <Ionicons
-          name={activeTab === 'saved' ? 'heart' : 'heart-outline'}
-          size={22}
-          color={activeTab === 'saved' ? '#16A34A' : '#6B7280'}
-        />
-        {savedProductIds.length > 0 && <View style={styles.badgeDot} />}
-        <Text style={[styles.tabLabel, activeTab === 'saved' && styles.tabLabelActive]}>
-          {t('saved')}
+        <View style={{ position: 'relative' }}>
+          <Ionicons
+            name={activeTab === 'orders' ? 'receipt' : 'receipt-outline'}
+            size={24}
+            color={activeTab === 'orders' ? '#16A34A' : '#6B7280'}
+          />
+          {orders.length > 0 && <View style={styles.ordersDot} />}
+        </View>
+        <Text style={[styles.tabLabel, activeTab === 'orders' && styles.tabLabelActive]}>
+          {t('orders')}
         </Text>
       </TouchableOpacity>
 
-      {/* My Ads / Listings Tab */}
+      {/* 4. Cart Tab */}
       <TouchableOpacity
         style={styles.tabItem}
-        onPress={() => navigateTo({ name: 'my_listings' })}
+        onPress={() => navigateTo({ name: 'cart' })}
+        activeOpacity={0.7}
+      >
+        <View style={{ position: 'relative' }}>
+          <Ionicons
+            name={activeTab === 'cart' ? 'cart' : 'cart-outline'}
+            size={24}
+            color={activeTab === 'cart' ? '#16A34A' : '#6B7280'}
+          />
+          {cartCount > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartCount}</Text>
+            </View>
+          )}
+        </View>
+        <Text style={[styles.tabLabel, activeTab === 'cart' && styles.tabLabelActive]}>
+          {t('cart')}
+        </Text>
+      </TouchableOpacity>
+
+      {/* 5. Profile Tab */}
+      <TouchableOpacity
+        style={styles.tabItem}
+        onPress={handleProfilePress}
         activeOpacity={0.7}
       >
         <Ionicons
-          name={activeTab === 'my_listings' ? 'person' : 'person-outline'}
-          size={22}
-          color={activeTab === 'my_listings' ? '#16A34A' : '#6B7280'}
+          name={activeTab === 'account' || activeTab === 'login' ? 'person' : 'person-outline'}
+          size={24}
+          color={activeTab === 'account' || activeTab === 'login' ? '#16A34A' : '#6B7280'}
         />
-        {myProductIds.length > 0 && <View style={styles.badgeDot} />}
-        <Text style={[styles.tabLabel, activeTab === 'my_listings' && styles.tabLabelActive]}>
-          {t('myAds')}
+        <Text style={[styles.tabLabel, (activeTab === 'account' || activeTab === 'login') && styles.tabLabelActive]}>
+          {isAuthenticated ? (currentUser?.name.split(' ')[0] || t('profile')) : t('profile')}
         </Text>
       </TouchableOpacity>
     </View>
@@ -99,22 +124,21 @@ const styles = StyleSheet.create({
     borderTopColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingHorizontal: 8,
-    elevation: 8,
+    paddingHorizontal: 6,
+    elevation: 10,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
   },
   tabItem: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
-    paddingVertical: 4,
+    paddingVertical: 6,
   },
   tabLabel: {
-    fontSize: 10,
+    fontSize: 10.5,
     marginTop: 2,
     fontWeight: '600',
     color: '#6B7280',
@@ -123,30 +147,33 @@ const styles = StyleSheet.create({
     color: '#16A34A',
     fontWeight: '800',
   },
-  sellBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F59E0B',
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -8,
+    backgroundColor: '#DC2626',
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -20,
-    borderWidth: 3,
+    paddingHorizontal: 3,
+    borderWidth: 1.5,
     borderColor: '#FFFFFF',
-    elevation: 6,
-    shadowColor: '#F59E0B',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 6,
   },
-  badgeDot: {
+  cartBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 9.5,
+    fontWeight: '800',
+  },
+  ordersDot: {
     position: 'absolute',
-    top: 4,
-    right: 20,
+    top: 0,
+    right: -2,
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#EF4444',
+    backgroundColor: '#16A34A',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },

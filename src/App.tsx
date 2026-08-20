@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, StatusBar, Platform } from 'react-native';
 import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
 import { MarketplaceProvider, useMarketplace } from './context/MarketplaceContext';
 import { Header } from './components/common/Header';
 import { MandiTicker } from './components/common/MandiTicker';
@@ -17,6 +18,10 @@ import { SavedScreen } from './components/screens/SavedScreen';
 import { MyListingsScreen } from './components/screens/MyListingsScreen';
 import { SearchScreen } from './components/screens/SearchScreen';
 import { SafetyGuideScreen } from './components/screens/SafetyGuideScreen';
+import { LoginScreen } from './components/screens/LoginScreen';
+import { FarmerAccountScreen } from './components/screens/FarmerAccountScreen';
+import { CartScreen } from './components/screens/CartScreen';
+import { OrdersScreen } from './components/screens/OrdersScreen';
 
 const MainAppContent: React.FC = () => {
   const { currentScreen } = useMarketplace();
@@ -46,6 +51,14 @@ const MainAppContent: React.FC = () => {
         return <SearchScreen initialQuery={currentScreen.initialQuery} />;
       case 'safety_guide':
         return <SafetyGuideScreen />;
+      case 'login':
+        return <LoginScreen />;
+      case 'account':
+        return <FarmerAccountScreen />;
+      case 'cart':
+        return <CartScreen />;
+      case 'orders':
+        return <OrdersScreen />;
       default:
         return <HomeScreen />;
     }
@@ -59,7 +72,11 @@ const MainAppContent: React.FC = () => {
     currentScreen.name === 'saved' ||
     currentScreen.name === 'my_listings' ||
     currentScreen.name === 'safety_guide' ||
-    currentScreen.name === 'category';
+    currentScreen.name === 'category' ||
+    currentScreen.name === 'login' ||
+    currentScreen.name === 'account' ||
+    currentScreen.name === 'cart' ||
+    currentScreen.name === 'orders';
 
   return (
     <View style={styles.safeArea}>
@@ -102,9 +119,11 @@ const styles = StyleSheet.create({
 export const App: React.FC = () => {
   return (
     <LanguageProvider>
-      <MarketplaceProvider>
-        <MainAppContent />
-      </MarketplaceProvider>
+      <AuthProvider>
+        <MarketplaceProvider>
+          <MainAppContent />
+        </MarketplaceProvider>
+      </AuthProvider>
     </LanguageProvider>
   );
 };

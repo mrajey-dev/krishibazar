@@ -1,41 +1,78 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TextInput, TouchableOpacity, Image, StyleSheet, Alert } from 'react-native';
 import { useLanguage } from '../../context/LanguageContext';
 import { useMarketplace } from '../../context/MarketplaceContext';
+import { useAuth } from '../../context/AuthContext';
 import { ProductCategory, Product } from '../../types';
 import { CATEGORIES_DATA, STATES_DISTRICTS_DATA } from '../../data/mockProducts';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const SAMPLE_IMAGES: Record<ProductCategory, string[]> = {
   all: ['https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&auto=format&fit=crop&q=80'],
-  seeds: [
-    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80',
+  plants_seedlings: [
+    'https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1508746829417-e6f548d8d6ed?w=800&auto=format&fit=crop&q=80'
   ],
-  machinery: [
-    'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1595838728639-4458f288b857?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80'
+  fodder_maize: [
+    'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&auto=format&fit=crop&q=80'
+  ],
+  onion_seedlings: [
+    'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1508746829417-e6f548d8d6ed?w=800&auto=format&fit=crop&q=80'
+  ],
+  chilli_seedlings: [
+    'https://images.unsplash.com/photo-1563865436874-9aef32095fad?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80'
+  ],
+  cabbage_seedlings: [
+    'https://images.unsplash.com/photo-1594282486552-05b4d80fbb9f?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80'
+  ],
+  seeds: [
+    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80'
   ],
   fertilizers: [
     'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=800&auto=format&fit=crop&q=80'
   ],
+  farming_equipment: [
+    'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1595838728639-4458f288b857?w=800&auto=format&fit=crop&q=80'
+  ],
+  machinery: [
+    'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?w=800&auto=format&fit=crop&q=80'
+  ],
   pesticides: [
-    'https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80'
+    'https://images.unsplash.com/photo-1628352081506-83c43123ed6d?w=800&auto=format&fit=crop&q=80'
   ],
   crops: [
-    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1540148426945-6cf22a6b2383?w=800&auto=format&fit=crop&q=80'
+    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&auto=format&fit=crop&q=80'
   ],
   livestock: [
+    'https://images.unsplash.com/photo-1527153857715-3908f2ae5e81?w=800&auto=format&fit=crop&q=80'
+  ],
+  irrigation: [
+    'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80'
+  ],
+  animal_feed: [
     'https://images.unsplash.com/photo-1527153857715-3908f2ae5e81?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=800&auto=format&fit=crop&q=80'
   ],
-  irrigation: [
-    'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80',
+  tomato_seedlings: [
+    'https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?w=800&auto=format&fit=crop&q=80'
+  ],
+  crop_protection: [
+    'https://images.unsplash.com/photo-1530595467537-0b5996c41f2d?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80'
+  ],
+  nursery_plants: [
+    'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?w=800&auto=format&fit=crop&q=80'
+  ],
+  other_agri: [
     'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80'
   ]
 };
@@ -43,6 +80,7 @@ const SAMPLE_IMAGES: Record<ProductCategory, string[]> = {
 export const SellProductScreen: React.FC = () => {
   const { language, t } = useLanguage();
   const { addProduct, navigateTo, goBack } = useMarketplace();
+  const { currentUser, isAuthenticated } = useAuth();
 
   const [category, setCategory] = useState<ProductCategory>('seeds');
   const [title, setTitle] = useState('');
@@ -57,14 +95,25 @@ export const SellProductScreen: React.FC = () => {
   const [description, setDescription] = useState('');
   const [selectedImgIdx, setSelectedImgIdx] = useState(0);
 
-  const [farmerName, setFarmerName] = useState('Baldev Singh');
-  const [phone, setPhone] = useState('+91 98765 12345');
-  const [whatsapp, setWhatsapp] = useState('919876512345');
-  const [state, setState] = useState('Punjab');
-  const [district, setDistrict] = useState('Ludhiana');
-  const [village, setVillage] = useState('Samrala');
+  const [farmerName, setFarmerName] = useState(currentUser?.name || 'Baldev Singh');
+  const [phone, setPhone] = useState(currentUser ? `+91 ${currentUser.phone}` : '+91 98765 12345');
+  const [whatsapp, setWhatsapp] = useState(currentUser ? `91${currentUser.phone}` : '919876512345');
+  const [state, setState] = useState(currentUser?.state || 'Punjab');
+  const [district, setDistrict] = useState(currentUser?.district || 'Ludhiana');
+  const [village, setVillage] = useState(currentUser?.village || 'Samrala');
 
   const [formError, setFormError] = useState('');
+
+  useEffect(() => {
+    if (currentUser) {
+      setFarmerName(currentUser.name);
+      setPhone(`+91 ${currentUser.phone}`);
+      setWhatsapp(`91${currentUser.phone}`);
+      setState(currentUser.state);
+      setDistrict(currentUser.district);
+      setVillage(currentUser.village);
+    }
+  }, [currentUser]);
 
   const handleSubmit = () => {
     if (!title.trim() && !titleHi.trim()) {
