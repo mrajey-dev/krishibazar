@@ -4,7 +4,6 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { MarketplaceProvider, useMarketplace } from './context/MarketplaceContext';
 import { Header } from './components/common/Header';
-import { MandiTicker } from './components/common/MandiTicker';
 import { BottomNav } from './components/common/BottomNav';
 import { ContactModal } from './components/common/ContactModal';
 
@@ -20,7 +19,6 @@ import { SearchScreen } from './components/screens/SearchScreen';
 import { SafetyGuideScreen } from './components/screens/SafetyGuideScreen';
 import { LoginScreen } from './components/screens/LoginScreen';
 import { FarmerAccountScreen } from './components/screens/FarmerAccountScreen';
-import { CartScreen } from './components/screens/CartScreen';
 import { OrdersScreen } from './components/screens/OrdersScreen';
 
 const MainAppContent: React.FC = () => {
@@ -55,8 +53,6 @@ const MainAppContent: React.FC = () => {
         return <LoginScreen />;
       case 'account':
         return <FarmerAccountScreen />;
-      case 'cart':
-        return <CartScreen />;
       case 'orders':
         return <OrdersScreen />;
       default:
@@ -75,20 +71,14 @@ const MainAppContent: React.FC = () => {
     currentScreen.name === 'category' ||
     currentScreen.name === 'login' ||
     currentScreen.name === 'account' ||
-    currentScreen.name === 'cart' ||
     currentScreen.name === 'orders';
 
   return (
     <View style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#15803D" />
 
-      {/* Main Header & Mandi Ticker on Home */}
-      {!isDetailOrSubScreen && (
-        <View>
-          <Header />
-          <MandiTicker />
-        </View>
-      )}
+      {/* Main Header on Home */}
+      {!isDetailOrSubScreen && <Header />}
 
       {/* Active Screen View */}
       <View style={styles.screenContainer}>

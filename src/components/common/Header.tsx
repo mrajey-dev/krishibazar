@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Modal, ScrollView, Platform, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, StyleSheet, Modal, ScrollView, Platform } from 'react-native';
 import { useLanguage } from '../../context/LanguageContext';
 import { useMarketplace } from '../../context/MarketplaceContext';
-import { useAuth } from '../../context/AuthContext';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { STATES_DISTRICTS_TALUKAS_DATA, STATES_DISTRICTS_DATA } from '../../data/mockProducts';
 import { Language } from '../../types';
@@ -13,13 +12,10 @@ export const Header: React.FC = () => {
     selectedLocation,
     setSelectedLocation,
     navigateTo,
-    searchQuery,
-    setSearchQuery,
     notifications,
     unreadNotificationsCount,
     markAllNotificationsRead
   } = useMarketplace();
-  const { currentUser, isAuthenticated } = useAuth();
 
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [showLanguagePicker, setShowLanguagePicker] = useState(false);
@@ -30,12 +26,6 @@ export const Header: React.FC = () => {
   const [tempState, setTempState] = useState<string>('Maharashtra');
   const [tempDistrict, setTempDistrict] = useState<string>('Nashik');
   const [locationSearchTerm, setLocationSearchTerm] = useState<string>('');
-
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim()) {
-      navigateTo({ name: 'search', initialQuery: searchQuery });
-    }
-  };
 
   const getLanguageLabel = (lang: Language) => {
     switch (lang) {
@@ -176,27 +166,6 @@ export const Header: React.FC = () => {
               </View>
             )}
           </TouchableOpacity>
-
-          {/* User / Profile Icon */}
-          <TouchableOpacity
-            style={styles.profileHeaderBtn}
-            onPress={() => {
-              if (isAuthenticated) {
-                navigateTo({ name: 'account' });
-              } else {
-                navigateTo({ name: 'login' });
-              }
-            }}
-            activeOpacity={0.85}
-          >
-            {isAuthenticated && currentUser?.avatar ? (
-              <Image source={{ uri: currentUser.avatar }} style={styles.profileAvatar} />
-            ) : (
-              <View style={styles.guestAvatarBox}>
-                <Ionicons name="person" size={16} color="#15803D" />
-              </View>
-            )}
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -222,33 +191,6 @@ export const Header: React.FC = () => {
           <Ionicons name="chevron-down" size={12} color="#FDE047" />
         </View>
       </TouchableOpacity>
-
-      {/* Large Farmer-Friendly Search Bar */}
-      <View style={styles.searchBoxWrapper}>
-        <Ionicons name="search" size={20} color="#16A34A" style={styles.searchIconLeft} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('searchSimplePlaceholder')}
-          placeholderTextColor="#6B7280"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSubmitEditing={handleSearchSubmit}
-          onFocus={() => navigateTo({ name: 'search', initialQuery: searchQuery })}
-          returnKeyType="search"
-        />
-        {searchQuery.length > 0 ? (
-          <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.searchRightAction}>
-            <Ionicons name="close-circle" size={18} color="#9CA3AF" />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            style={styles.searchRightAction}
-            onPress={() => navigateTo({ name: 'search' })}
-          >
-            <MaterialCommunityIcons name="microphone" size={20} color="#15803D" />
-          </TouchableOpacity>
-        )}
-      </View>
 
       {/* Notifications Modal */}
       <Modal
@@ -714,28 +656,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '800',
   },
-  profileHeaderBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-  },
-  profileAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
-    borderColor: '#FDE047',
-  },
-  guestAvatarBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#DCFCE7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
   locationBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -744,7 +664,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 7,
-    marginBottom: 12,
+    marginBottom: 0,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
   },
@@ -778,36 +698,6 @@ const styles = StyleSheet.create({
     color: '#FDE047',
     fontSize: 11,
     fontWeight: '800',
-  },
-  searchBoxWrapper: {
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  searchIconLeft: {
-    position: 'absolute',
-    left: 14,
-    zIndex: 2,
-  },
-  searchInput: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingVertical: 12,
-    paddingLeft: 44,
-    paddingRight: 44,
-    fontSize: 14,
-    color: '#111827',
-    fontWeight: '600',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 4,
-  },
-  searchRightAction: {
-    position: 'absolute',
-    right: 14,
-    zIndex: 2,
-    padding: 4,
   },
   modalOverlay: {
     flex: 1,

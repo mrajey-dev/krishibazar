@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useState } from 'react';
-import { Product, ProductCategory, ScreenType, SellerInfo, CartItem, OrderItem, NotificationItem } from '../types';
+import { Product, ProductCategory, ScreenType, SellerInfo, OrderItem, NotificationItem } from '../types';
 import { MOCK_PRODUCTS, MOCK_SELLERS } from '../data/mockProducts';
 
 interface MarketplaceContextType {
   products: Product[];
   savedProductIds: string[];
   myProductIds: string[];
-  cartItems: CartItem[];
   orders: OrderItem[];
   notifications: NotificationItem[];
   currentScreen: ScreenType;
@@ -14,7 +13,6 @@ interface MarketplaceContextType {
   contactModalProduct: Product | null;
   selectedLocation: { state: string; district: string; taluka?: string };
   searchQuery: string;
-  cartCount: number;
   unreadNotificationsCount: number;
   
   navigateTo: (screen: ScreenType) => void;
@@ -32,12 +30,7 @@ interface MarketplaceContextType {
   getProductsBySeller: (sellerId: string) => Product[];
   getProductsByCategory: (cat: ProductCategory) => Product[];
 
-  // Cart & Orders & Notifications
-  addToCart: (product: Product, quantity?: number) => void;
-  removeFromCart: (productId: string) => void;
-  updateCartQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
-  placeOrder: (deliveryMethod: 'pickup_at_mandi' | 'direct_farm_visit' | 'seller_delivery') => OrderItem[];
+  // Orders & Notifications
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
 }
@@ -78,9 +71,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [products, setProducts] = useState<Product[]>(MOCK_PRODUCTS);
   const [savedProductIds, setSavedProductIds] = useState<string[]>(['prod_onion_01', 'prod_seeds_01']);
   const [myProductIds, setMyProductIds] = useState<string[]>([]);
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    { product: MOCK_PRODUCTS[0], quantity: 2, selectedAt: 'Just now' }
-  ]);
   const [orders, setOrders] = useState<OrderItem[]>([
     {
       id: 'ord_101',
@@ -173,57 +163,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
     return products.filter(p => p.category === cat);
   };
 
-  // Cart Handlers
-  const addToCart = (product: Product, quantity = 1) => {
-    setCartItems(prev => {
-      const index = prev.findIndex(item => item.product.id === product.id);
-      if (index > -1) {
-        const updated = [...prev];
-        updated[index].quantity += quantity;
-        return updated;
-      }
-      return [...prev, { product, quantity, selectedAt: 'Just now' }];
-    });
-  };
-
-  const removeFromCart = (productId: string) => {
-    setCartItems(prev => prev.filter(item => item.product.id !== productId));
-  };
-
-  const updateCartQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    setCartItems(prev =>
-      prev.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-  };
-
-  const placeOrder = (deliveryMethod: 'pickup_at_mandi' | 'direct_farm_visit' | 'seller_delivery'): OrderItem[] => {
-    const newOrders: OrderItem[] = cartItems.map(item => ({
-      id: `ord_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
-      product: item.product,
-      quantity: item.quantity,
-      totalPrice: item.product.price * item.quantity,
-      status: 'confirmed',
-      orderDate: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
-      sellerPhone: item.product.seller.phone,
-      sellerName: item.product.seller.name,
-      deliveryMethod
-    }));
-
-    setOrders(prev => [...newOrders, ...prev]);
-    clearCart();
-    return newOrders;
-  };
-
   const markNotificationRead = (id: string) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, isRead: true } : n))
@@ -234,7 +173,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
 
   return (
@@ -243,7 +181,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
         products,
         savedProductIds,
         myProductIds,
-        cartItems,
         orders,
         notifications,
         currentScreen,
@@ -251,7 +188,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
         contactModalProduct,
         selectedLocation,
         searchQuery,
-        cartCount,
         unreadNotificationsCount,
         navigateTo,
         goBack,
@@ -267,11 +203,6 @@ export const MarketplaceProvider: React.FC<{ children: React.ReactNode }> = ({ c
         getSellerById,
         getProductsBySeller,
         getProductsByCategory,
-        addToCart,
-        removeFromCart,
-        updateCartQuantity,
-        clearCart,
-        placeOrder,
         markNotificationRead,
         markAllNotificationsRead
       }}

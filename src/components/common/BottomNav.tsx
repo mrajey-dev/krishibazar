@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 export const BottomNav: React.FC = () => {
   const { t } = useLanguage();
-  const { currentScreen, navigateTo, cartCount, orders } = useMarketplace();
+  const { currentScreen, navigateTo, orders } = useMarketplace();
   const { isAuthenticated, currentUser } = useAuth();
 
   const activeTab = currentScreen.name;
@@ -73,30 +73,7 @@ export const BottomNav: React.FC = () => {
         </Text>
       </TouchableOpacity>
 
-      {/* 4. Cart Tab */}
-      <TouchableOpacity
-        style={styles.tabItem}
-        onPress={() => navigateTo({ name: 'cart' })}
-        activeOpacity={0.7}
-      >
-        <View style={{ position: 'relative' }}>
-          <Ionicons
-            name={activeTab === 'cart' ? 'cart' : 'cart-outline'}
-            size={24}
-            color={activeTab === 'cart' ? '#16A34A' : '#6B7280'}
-          />
-          {cartCount > 0 && (
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartCount}</Text>
-            </View>
-          )}
-        </View>
-        <Text style={[styles.tabLabel, activeTab === 'cart' && styles.tabLabelActive]}>
-          {t('cart')}
-        </Text>
-      </TouchableOpacity>
-
-      {/* 5. Profile Tab */}
+      {/* 4. Profile Tab */}
       <TouchableOpacity
         style={styles.tabItem}
         onPress={handleProfilePress}
@@ -145,25 +122,6 @@ const styles = StyleSheet.create({
   },
   tabLabelActive: {
     color: '#16A34A',
-    fontWeight: '800',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -8,
-    backgroundColor: '#DC2626',
-    borderRadius: 9,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
-  cartBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9.5,
     fontWeight: '800',
   },
   ordersDot: {

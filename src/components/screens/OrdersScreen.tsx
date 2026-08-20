@@ -29,8 +29,8 @@ export const OrdersScreen: React.FC = () => {
           onPress={() => navigateTo({ name: 'home' })}
           activeOpacity={0.8}
         >
-          <Ionicons name="cart" size={14} color="#000000" />
-          <Text style={styles.postBtnText}>{language === 'hi' ? 'खरीदें' : 'Shop'}</Text>
+          <Ionicons name="storefront" size={14} color="#000000" />
+          <Text style={styles.postBtnText}>{language === 'hi' ? 'खरीदें' : 'Browse'}</Text>
         </TouchableOpacity>
       </View>
 

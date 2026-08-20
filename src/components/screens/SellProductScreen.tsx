@@ -72,6 +72,54 @@ const SAMPLE_IMAGES: Record<ProductCategory, string[]> = {
     'https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=800&auto=format&fit=crop&q=80',
     'https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?w=800&auto=format&fit=crop&q=80'
   ],
+  fruit_plants: [
+    'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800&auto=format&fit=crop&q=80'
+  ],
+  solar_agriculture: [
+    'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&auto=format&fit=crop&q=80'
+  ],
+  dairy_cattle: [
+    'https://images.unsplash.com/photo-1546445317-29f4545e9d53?w=800&auto=format&fit=crop&q=80'
+  ],
+  goat_sheep: [
+    'https://images.unsplash.com/photo-1535268647677-300dbf3d78d1?w=800&auto=format&fit=crop&q=80'
+  ],
+  poultry_farming: [
+    'https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?w=800&auto=format&fit=crop&q=80'
+  ],
+  organic_compost: [
+    'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=800&auto=format&fit=crop&q=80'
+  ],
+  spices_garlic: [
+    'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?w=800&auto=format&fit=crop&q=80'
+  ],
+  paddy_rice: [
+    'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&auto=format&fit=crop&q=80'
+  ],
+  cotton_kapas: [
+    'https://images.unsplash.com/photo-1606041008023-472dfb5e530f?w=800&auto=format&fit=crop&q=80'
+  ],
+  sugarcane_sets: [
+    'https://images.unsplash.com/photo-1592417817098-8f3d6eb22509?w=800&auto=format&fit=crop&q=80'
+  ],
+  pulses_dal: [
+    'https://images.unsplash.com/photo-1515543237350-b3eea1ec8082?w=800&auto=format&fit=crop&q=80'
+  ],
+  oilseeds: [
+    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800&auto=format&fit=crop&q=80'
+  ],
+  honey_beekeeping: [
+    'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&auto=format&fit=crop&q=80'
+  ],
+  mushroom_spawn: [
+    'https://images.unsplash.com/photo-1509358271058-acd22cc93898?w=800&auto=format&fit=crop&q=80'
+  ],
+  fish_aquaculture: [
+    'https://images.unsplash.com/photo-1534043464124-3be32fe00099?w=800&auto=format&fit=crop&q=80'
+  ],
+  farm_tools: [
+    'https://images.unsplash.com/photo-1592878904946-b3cd8ae243d0?w=800&auto=format&fit=crop&q=80'
+  ],
   other_agri: [
     'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80'
   ]

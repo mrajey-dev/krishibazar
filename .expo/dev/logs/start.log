@@ -2395,3 +2395,8 @@
 {"_e":"metro:bundling:started","_t":1787228384957,"id":"3","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
 {"_e":"metro:bundling:progress","_t":1787228384957,"id":"3","progress":0,"total":1,"current":0}
 {"_e":"metro:bundling:done","_t":1787228385093,"id":"3","total":1,"ms":136.299}
+{"_e":"metro:bundling:started","_t":1787229176689,"id":"5","platform":"android","environment":null,"entry":"node_modules\\expo\\AppEntry.js"}
+{"_e":"metro:bundling:progress","_t":1787229176689,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:progress","_t":1787229176690,"id":"5","progress":0,"total":1,"current":0}
+{"_e":"metro:bundling:done","_t":1787229176827,"id":"5","total":1,"ms":137.9048}
+{"_e":"metro:client_log","_t":1787229966566,"level":"error","data":["[ReferenceError: Property 'MandiTicker' doesn't exist]"]}

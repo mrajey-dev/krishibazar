@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Product } from '../../types';
 import { useLanguage } from '../../context/LanguageContext';
@@ -12,19 +12,11 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { language, t } = useLanguage();
-  const { navigateTo, isProductSaved, toggleSaveProduct, addToCart } = useMarketplace();
-  const [addedAnimation, setAddedAnimation] = useState(false);
+  const { navigateTo, isProductSaved, toggleSaveProduct, openContactModal } = useMarketplace();
 
   const isSaved = isProductSaved(product.id);
   const displayTitle = language === 'mr' ? (product.titleMr || product.titleHi) : language === 'hi' ? product.titleHi : product.title;
   const displayUnit = language === 'mr' ? (product.unitMr || product.unitHi) : language === 'hi' ? product.unitHi : product.unit;
-
-  const handleCartPress = (e: any) => {
-    e?.stopPropagation?.();
-    addToCart(product, 1);
-    setAddedAnimation(true);
-    setTimeout(() => setAddedAnimation(false), 1800);
-  };
 
   const getConditionText = () => {
     if (product.isUrgent) return language === 'mr' ? 'तातडीचे' : language === 'hi' ? 'जरूरी' : 'URGENT';
@@ -101,21 +93,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           </Text>
         </View>
 
-        {/* 3. Add to Cart Button */}
+        {/* 3. Direct Contact Button */}
         <TouchableOpacity
-          style={[styles.addToCartBtn, addedAnimation && styles.addToCartBtnAdded]}
-          onPress={handleCartPress}
+          style={styles.contactBtn}
+          onPress={(e) => {
+            e?.stopPropagation?.();
+            openContactModal(product);
+          }}
           activeOpacity={0.8}
         >
-          <Ionicons
-            name={addedAnimation ? 'checkmark-circle' : 'cart-outline'}
-            size={13}
-            color={addedAnimation ? '#15803D' : '#FFFFFF'}
-          />
-          <Text style={[styles.addToCartText, addedAnimation && styles.addToCartTextAdded]}>
-            {addedAnimation
-              ? (language === 'hi' ? 'कार्ट में जोड़ा!' : language === 'mr' ? 'जोडले!' : 'Added!')
-              : t('addToCart')}
+          <Ionicons name="call" size={12} color="#FFFFFF" />
+          <Text style={styles.contactBtnText}>
+            {t('callFarmer')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -235,26 +224,18 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
-  addToCartBtn: {
+  contactBtn: {
     backgroundColor: '#16A34A',
     paddingVertical: 5.5,
     borderRadius: 7,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: 4,
   },
-  addToCartBtnAdded: {
-    backgroundColor: '#DCFCE7',
-    borderWidth: 1,
-    borderColor: '#86EFAC',
-  },
-  addToCartText: {
+  contactBtnText: {
     color: '#FFFFFF',
     fontSize: 10,
     fontWeight: '800',
-  },
-  addToCartTextAdded: {
-    color: '#15803D',
   },
 });

@@ -76,64 +76,165 @@ export const CategoryScreen: React.FC<CategoryScreenProps> = ({ categoryId, init
     <View style={styles.container}>
       {/* Top Header */}
       <View style={styles.header}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-          <TouchableOpacity onPress={goBack} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={18} color="#374151" />
+        <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={goBack} style={styles.backBtn} activeOpacity={0.75}>
+            <Ionicons name="arrow-back" size={18} color="#1E293B" />
           </TouchableOpacity>
-          <View>
-            <Text style={styles.headerTitle}>
-              {language === 'mr' && categoryMeta?.nameMr ? categoryMeta.nameMr : language === 'hi' ? categoryMeta?.nameHi : categoryMeta?.nameEn}
-            </Text>
-            <Text style={styles.headerCount}>
-              {filtered.length} {language === 'hi' ? 'सामान उपलब्ध' : language === 'mr' ? 'वस्तू उपलब्ध' : 'items available'}
-            </Text>
+          <View style={styles.headerTitleBox}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={{ fontSize: 16 }}>{selectedCategory === 'all' ? '🌾' : (categoryMeta?.emoji || '🌾')}</Text>
+              <Text style={styles.headerTitle} numberOfLines={1}>
+                {selectedCategory === 'all'
+                  ? (language === 'hi' ? 'सभी श्रेणियां' : language === 'mr' ? 'सर्व वर्गवारी' : 'All Categories')
+                  : (language === 'mr' && categoryMeta?.nameMr ? categoryMeta.nameMr : language === 'hi' ? categoryMeta?.nameHi : categoryMeta?.nameEn)}
+              </Text>
+            </View>
+            <View style={styles.headerCountBadge}>
+              <Text style={styles.headerCountText}>
+                {filtered.length} {language === 'hi' ? 'सामान उपलब्ध' : language === 'mr' ? 'शेतमाल उपलब्ध' : 'items available'}
+              </Text>
+            </View>
           </View>
         </View>
 
         <TouchableOpacity
           onPress={() => setShowFilterDrawer(true)}
           style={[styles.filterBtn, (onlyOrganic || onlyVerified || sortBy !== 'newest') && styles.filterBtnActive]}
+          activeOpacity={0.75}
         >
-          <Ionicons name="options-outline" size={14} color={onlyOrganic || onlyVerified || sortBy !== 'newest' ? '#15803D' : '#374151'} />
+          <Ionicons
+            name="options"
+            size={14}
+            color={onlyOrganic || onlyVerified || sortBy !== 'newest' ? '#15803D' : '#334155'}
+          />
           <Text style={[styles.filterBtnText, (onlyOrganic || onlyVerified || sortBy !== 'newest') && { color: '#15803D' }]}>
             {t('filterBy')}
           </Text>
+          {(onlyOrganic || onlyVerified || sortBy !== 'newest') && (
+            <View style={styles.filterActiveDot} />
+          )}
         </TouchableOpacity>
       </View>
 
-      {/* Category Pills */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catTabs}>
-        {CATEGORIES_DATA.map(cat => (
+      {/* Professional Horizontal Category Carousel */}
+      <View style={styles.catTabsWrapper}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.catTabsContent}
+        >
+          {/* 'All' Category Tab */}
           <TouchableOpacity
-            key={cat.id}
             onPress={() => {
-              setSelectedCategory(cat.id);
+              setSelectedCategory('all');
               setSelectedSubCategory('all');
             }}
-            style={[styles.catTab, selectedCategory === cat.id && styles.catTabActive]}
+            style={[styles.catTabPill, selectedCategory === 'all' && styles.catTabPillActive]}
+            activeOpacity={0.78}
           >
-            <Text style={[styles.catTabText, selectedCategory === cat.id && styles.catTabTextActive]}>
-              {language === 'mr' && cat.nameMr ? cat.nameMr : language === 'hi' ? cat.nameHi : cat.nameEn}
+            <View style={[styles.catTabIconBox, selectedCategory === 'all' && styles.catTabIconBoxActive]}>
+              <Text style={{ fontSize: 13 }}>🌟</Text>
+            </View>
+            <Text style={[styles.catTabLabel, selectedCategory === 'all' && styles.catTabLabelActive]}>
+              {language === 'hi' ? 'सभी' : language === 'mr' ? 'सर्व' : 'All'}
             </Text>
+            <View style={[styles.catTabCountBadge, selectedCategory === 'all' && styles.catTabCountBadgeActive]}>
+              <Text style={[styles.catTabCountText, selectedCategory === 'all' && styles.catTabCountTextActive]}>
+                {products.length}
+              </Text>
+            </View>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+
+          {/* All 29 Category Tabs */}
+          {CATEGORIES_DATA.map(cat => {
+            const isSelected = selectedCategory === cat.id;
+            return (
+              <TouchableOpacity
+                key={cat.id}
+                onPress={() => {
+                  setSelectedCategory(cat.id);
+                  setSelectedSubCategory('all');
+                }}
+                style={[
+                  styles.catTabPill,
+                  isSelected && styles.catTabPillActive,
+                ]}
+                activeOpacity={0.78}
+              >
+                <View
+                  style={[
+                    styles.catTabIconBox,
+                    { backgroundColor: isSelected ? '#DCFCE7' : (cat.bgColor || '#F1F5F9') },
+                  ]}
+                >
+                  <Text style={{ fontSize: 13 }}>{cat.emoji}</Text>
+                </View>
+                <Text
+                  style={[
+                    styles.catTabLabel,
+                    isSelected && styles.catTabLabelActive,
+                  ]}
+                >
+                  {language === 'mr' && cat.nameMr ? cat.nameMr : language === 'hi' ? cat.nameHi : cat.nameEn}
+                </Text>
+                <View style={[styles.catTabCountBadge, isSelected && styles.catTabCountBadgeActive]}>
+                  <Text style={[styles.catTabCountText, isSelected && styles.catTabCountTextActive]}>
+                    {cat.count}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* Selected Category Info Banner */}
+      {selectedCategory !== 'all' && categoryMeta && (
+        <View style={[styles.catHeroStrip, { backgroundColor: categoryMeta.bgColor || '#F0FDF4', borderColor: `${categoryMeta.color}35` || '#BBF7D0' }]}>
+          <View style={styles.catHeroIconSquare}>
+            <Text style={{ fontSize: 20 }}>{categoryMeta.emoji}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.catHeroTitle} numberOfLines={1}>
+              {language === 'mr' && categoryMeta.nameMr ? categoryMeta.nameMr : language === 'hi' ? categoryMeta.nameHi : categoryMeta.nameEn}
+            </Text>
+            <Text style={styles.catHeroDesc} numberOfLines={1}>
+              {language === 'mr' && categoryMeta.descriptionMr ? categoryMeta.descriptionMr : language === 'hi' ? categoryMeta.descriptionHi : categoryMeta.descriptionEn}
+            </Text>
+          </View>
+          <View style={styles.catHeroBadge}>
+            <Ionicons name="checkmark-circle" size={11} color="#15803D" />
+            <Text style={styles.catHeroBadgeText}>{filtered.length} {language === 'hi' ? 'उपलब्ध' : 'Active'}</Text>
+          </View>
+        </View>
+      )}
 
       {/* Subcategory Pills */}
       {subCategories.length > 2 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subCatTabs}>
-          {subCategories.map(sub => (
-            <TouchableOpacity
-              key={sub}
-              onPress={() => setSelectedSubCategory(sub)}
-              style={[styles.subTab, selectedSubCategory === sub && styles.subTabActive]}
-            >
-              <Text style={[styles.subTabText, selectedSubCategory === sub && styles.subTabTextActive]}>
-                {sub === 'all' ? (language === 'hi' ? 'सभी किस्में' : 'All Types') : sub}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        <View style={styles.subCatWrapper}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.subCatContent}
+          >
+            {subCategories.map(sub => {
+              const isSubActive = selectedSubCategory === sub;
+              return (
+                <TouchableOpacity
+                  key={sub}
+                  onPress={() => setSelectedSubCategory(sub)}
+                  style={[styles.subTabPill, isSubActive && styles.subTabPillActive]}
+                  activeOpacity={0.75}
+                >
+                  {isSubActive && <Ionicons name="checkmark-circle" size={12} color="#15803D" style={{ marginRight: 3 }} />}
+                  <Text style={[styles.subTabPillText, isSubActive && styles.subTabPillTextActive]}>
+                    {sub === 'all' ? (language === 'hi' ? 'सभी प्रकार' : language === 'mr' ? 'सर्व प्रकार' : 'All Types') : sub}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
       )}
 
       {/* Product List Grid */}
@@ -244,101 +345,224 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#F1F5F9',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
   },
   backBtn: {
-    backgroundColor: '#F3F4F6',
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  headerTitleBox: {
+    flex: 1,
   },
   headerTitle: {
     fontSize: 15,
     fontWeight: '800',
-    color: '#111827',
+    color: '#0F172A',
   },
-  headerCount: {
-    fontSize: 11,
-    color: '#6B7280',
+  headerCountBadge: {
+    alignSelf: 'flex-start',
+    marginTop: 1,
+  },
+  headerCountText: {
+    fontSize: 10.5,
+    color: '#64748B',
+    fontWeight: '600',
   },
   filterBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    backgroundColor: '#FFFFFF',
+    gap: 5,
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 16,
+    borderColor: '#E2E8F0',
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
   filterBtnActive: {
     backgroundColor: '#DCFCE7',
-    borderColor: '#16A34A',
+    borderColor: '#86EFAC',
   },
   filterBtnText: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#374151',
+    color: '#334155',
   },
-  catTabs: {
-    backgroundColor: '#F8FAF5',
-    paddingHorizontal: 12,
+  filterActiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#16A34A',
+    marginLeft: 1,
+  },
+  catTabsWrapper: {
+    backgroundColor: '#FFFFFF',
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#E2E8D8',
+    borderBottomColor: '#F1F5F9',
   },
-  catTab: {
+  catTabsContent: {
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    gap: 8,
+  },
+  catTabPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingLeft: 4,
+    paddingRight: 10,
+    paddingVertical: 4.5,
+    borderRadius: 20,
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#D1D5DB',
-    marginRight: 6,
+    borderColor: '#E2E8F0',
   },
-  catTabActive: {
-    backgroundColor: '#16A34A',
-    borderColor: '#16A34A',
+  catTabPillActive: {
+    backgroundColor: '#15803D',
+    borderColor: '#15803D',
+    elevation: 2,
+    shadowColor: '#15803D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
-  catTabText: {
-    fontSize: 11.5,
-    fontWeight: '700',
-    color: '#374151',
+  catTabIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  catTabTextActive: {
-    color: '#FFFFFF',
-  },
-  subCatTabs: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  subTab: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-    backgroundColor: '#F3F4F6',
-    marginRight: 6,
-  },
-  subTabActive: {
+  catTabIconBoxActive: {
     backgroundColor: '#DCFCE7',
   },
-  subTabText: {
+  catTabLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  catTabLabelActive: {
+    color: '#FFFFFF',
+    fontWeight: '800',
+  },
+  catTabCountBadge: {
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 10,
+    marginLeft: 2,
+  },
+  catTabCountBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+  },
+  catTabCountText: {
+    fontSize: 9.5,
+    fontWeight: '700',
+    color: '#475569',
+  },
+  catTabCountTextActive: {
+    color: '#FFFFFF',
+  },
+  catHeroStrip: {
+    marginHorizontal: 12,
+    marginTop: 8,
+    borderRadius: 12,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderWidth: 1,
+  },
+  catHeroIconSquare: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  catHeroTitle: {
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  catHeroDesc: {
+    fontSize: 10.5,
+    color: '#475569',
+    marginTop: 1,
+  },
+  catHeroBadge: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 7,
+    paddingVertical: 3.5,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    borderWidth: 0.8,
+    borderColor: '#BBF7D0',
+  },
+  catHeroBadgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  subCatWrapper: {
+    backgroundColor: '#F8FAF5',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+  },
+  subCatContent: {
+    paddingHorizontal: 12,
+    gap: 6,
+  },
+  subTabPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 11,
+    paddingVertical: 4.5,
+    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  subTabPillActive: {
+    backgroundColor: '#DCFCE7',
+    borderColor: '#86EFAC',
+  },
+  subTabPillText: {
     fontSize: 11,
-    color: '#4B5563',
+    color: '#475569',
     fontWeight: '600',
   },
-  subTabTextActive: {
+  subTabPillTextActive: {
     color: '#15803D',
     fontWeight: '800',
   },

@@ -12,12 +12,28 @@ export type ProductCategory =
   | 'farming_equipment'
   | 'crop_protection'
   | 'nursery_plants'
+  | 'fruit_plants'
+  | 'irrigation'
+  | 'solar_agriculture'
+  | 'dairy_cattle'
+  | 'goat_sheep'
+  | 'poultry_farming'
+  | 'organic_compost'
+  | 'spices_garlic'
+  | 'paddy_rice'
+  | 'cotton_kapas'
+  | 'sugarcane_sets'
+  | 'pulses_dal'
+  | 'oilseeds'
+  | 'honey_beekeeping'
+  | 'mushroom_spawn'
+  | 'fish_aquaculture'
+  | 'farm_tools'
   | 'other_agri'
   | 'machinery'
   | 'pesticides'
   | 'crops'
-  | 'livestock'
-  | 'irrigation';
+  | 'livestock';
 
 export interface CategoryInfo {
   id: ProductCategory;
@@ -150,12 +166,6 @@ export interface FarmerUser {
   pin?: string;
 }
 
-export interface CartItem {
-  product: Product;
-  quantity: number;
-  selectedAt: string;
-}
-
 export interface OrderItem {
   id: string;
   product: Product;
@@ -190,7 +200,6 @@ export type ScreenType =
   | { name: 'safety_guide' }
   | { name: 'login'; redirectScreen?: ScreenType }
   | { name: 'account' }
-  | { name: 'cart' }
   | { name: 'orders' };
 
 export type Language = 'en' | 'hi' | 'mr';

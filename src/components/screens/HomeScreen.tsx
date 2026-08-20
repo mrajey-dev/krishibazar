@@ -8,23 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 
 export const HomeScreen: React.FC = () => {
   const { language, t } = useLanguage();
-  const { products, navigateTo, selectedLocation, addToCart } = useMarketplace();
-  const [toastMsg, setToastMsg] = useState('');
-
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(''), 2500);
-  };
-
-  const handleAddToCart = (product: Product) => {
-    addToCart(product, 1);
-    showToast(`🛒 ${language === 'hi' ? 'कार्ट में जोड़ा गया!' : language === 'mr' ? 'कार्टमध्ये जोडले!' : 'Added to Cart!'}`);
-  };
-
-  const handleBuyNow = (product: Product) => {
-    addToCart(product, 1);
-    navigateTo({ name: 'cart' });
-  };
+  const { products, navigateTo, selectedLocation, openContactModal } = useMarketplace();
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   // Filter products by selected state, district, and taluka
   const matchedProducts = products.filter(p => {
@@ -70,133 +55,111 @@ export const HomeScreen: React.FC = () => {
 
   return (
     <View style={styles.screenWrapper}>
-      {/* Toast Feedback Notification */}
-      {!!toastMsg && (
-        <View style={styles.toastContainer}>
-          <Ionicons name="checkmark-circle" size={16} color="#4ADE80" />
-          <Text style={styles.toastText}>{toastMsg}</Text>
-        </View>
-      )}
-
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* 1. TOP 4 FAST SERVICES / HIGHLIGHTS */}
-        <View style={styles.quickServicesGrid}>
-          <TouchableOpacity
-            style={[styles.quickServiceCard, { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}
-            onPress={() => navigateTo({ name: 'category', categoryId: 'onion_seedlings' })}
-            activeOpacity={0.78}
-          >
-            <View style={[styles.quickServiceIconBox, { backgroundColor: '#DCFCE7' }]}>
-              <Text style={{ fontSize: 20 }}>🧅</Text>
-            </View>
-            <Text style={styles.quickServiceTitle}>
-              {language === 'hi' ? 'कांदा / प्याज पौध' : language === 'mr' ? 'कांदा रोपे' : 'Onion Seedlings'}
-            </Text>
-            <Text style={styles.quickServiceSub}>
-              {language === 'hi' ? 'ताजा नर्सरी' : 'Nursery Ready'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.quickServiceCard, { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' }]}
-            onPress={() => navigateTo({ name: 'category', categoryId: 'fodder_maize' })}
-            activeOpacity={0.78}
-          >
-            <View style={[styles.quickServiceIconBox, { backgroundColor: '#FDE68A' }]}>
-              <Text style={{ fontSize: 20 }}>🌽</Text>
-            </View>
-            <Text style={styles.quickServiceTitle}>
-              {language === 'hi' ? 'मक्का व हरा चारा' : language === 'mr' ? 'मका चारा' : 'Maize Fodder'}
-            </Text>
-            <Text style={styles.quickServiceSub}>
-              {language === 'hi' ? 'पौष्टिक वैरण' : 'Green Silage'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.quickServiceCard, { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }]}
-            onPress={() => navigateTo({ name: 'sell' })}
-            activeOpacity={0.78}
-          >
-            <View style={[styles.quickServiceIconBox, { backgroundColor: '#DBEAFE' }]}>
-              <Ionicons name="add-circle" size={22} color="#2563EB" />
-            </View>
-            <Text style={styles.quickServiceTitle}>
-              {language === 'hi' ? 'सामान बेचें' : language === 'mr' ? 'शेतमाल विका' : 'Sell Free'}
-            </Text>
-            <Text style={styles.quickServiceSub}>
-              {language === 'hi' ? '0% कमीशन' : '0% Commission'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.quickServiceCard, { backgroundColor: '#FAF5FF', borderColor: '#E9D5FF' }]}
-            onPress={() => navigateTo({ name: 'safety_guide' })}
-            activeOpacity={0.78}
-          >
-            <View style={[styles.quickServiceIconBox, { backgroundColor: '#F3E8FF' }]}>
-              <Ionicons name="shield-checkmark" size={20} color="#7C3AED" />
-            </View>
-            <Text style={styles.quickServiceTitle}>
-              {language === 'hi' ? 'सुरक्षित व्यापार' : language === 'mr' ? 'सुरक्षित खरेदी' : 'Safe Trading'}
-            </Text>
-            <Text style={styles.quickServiceSub}>
-              {language === 'hi' ? 'सीधा संपर्क' : 'Direct Call'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* 2. 10 AGRICULTURAL MAIN CATEGORIES */}
-        <View style={styles.sectionContainer}>
+        {/* 1. AGRICULTURAL MAIN CATEGORIES (EXPANDABLE) */}
+        <View style={styles.categoriesSectionCard}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <View style={styles.sectionIconBadgeGreen}>
-                <Ionicons name="grid" size={15} color="#15803D" />
+            <View>
+              <View style={styles.sectionTitleRow}>
+                <View style={styles.sectionIconBadgeGreen}>
+                  <Ionicons name="grid" size={15} color="#15803D" />
+                </View>
+                <Text style={styles.sectionHeading}>{t('allCategories')}</Text>
+                <View style={styles.catCountTotalBadge}>
+                  <Text style={styles.catCountTotalText}>
+                    {showAllCategories ? `${CATEGORIES_DATA.length} Total` : `8 of ${CATEGORIES_DATA.length}`}
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.sectionHeading}>{t('allCategories')}</Text>
+              <Text style={styles.sectionSubHeading}>
+                {language === 'hi'
+                  ? 'ताजा पौध, प्रमाणित बीज, चारा व खाद'
+                  : language === 'mr'
+                  ? 'ताजी रोपे, प्रमाणित बियाणे, चारा व खते'
+                  : 'Verified seedlings, seeds, fodder & inputs'}
+              </Text>
             </View>
             <TouchableOpacity
-              onPress={() => navigateTo({ name: 'category', categoryId: 'all' })}
-              style={styles.viewAllBtn}
+              onPress={() => setShowAllCategories(prev => !prev)}
+              style={[styles.viewAllBtn, showAllCategories && styles.viewLessBtn]}
               activeOpacity={0.7}
             >
-              <Text style={styles.viewAllText}>{t('viewAll')}</Text>
-              <Ionicons name="chevron-forward" size={13} color="#16A34A" />
+              <Text style={[styles.viewAllText, showAllCategories && styles.viewLessText]}>
+                {showAllCategories
+                  ? (language === 'hi' ? 'कम देखें' : language === 'mr' ? 'कमी दाखवा' : 'See Less')
+                  : (language === 'hi' ? 'सभी देखें' : language === 'mr' ? 'सर्व पहा' : 'See All')}
+              </Text>
+              <Ionicons
+                name={showAllCategories ? 'chevron-up' : 'chevron-down'}
+                size={13}
+                color={showAllCategories ? '#475569' : '#16A34A'}
+              />
             </TouchableOpacity>
           </View>
 
-          {/* Compact Space-Efficient 2-Column Category Grid */}
-          <View style={styles.categoriesGrid}>
-            {CATEGORIES_DATA.map(cat => (
+          {/* Categories Grid (4 Columns, 8 initially or All on Expand) */}
+          <View style={styles.categoriesGrid4Col}>
+            {(showAllCategories ? CATEGORIES_DATA : CATEGORIES_DATA.slice(0, 8)).map(cat => (
               <TouchableOpacity
                 key={cat.id}
-                style={styles.categoryCardCompact}
+                style={styles.categoryCard4Col}
                 onPress={() => navigateTo({ name: 'category', categoryId: cat.id })}
-                activeOpacity={0.72}
+                activeOpacity={0.75}
               >
-                <View style={styles.catImgWrapper}>
-                  <Image source={{ uri: cat.image }} style={styles.catThumbnail} />
-                  <View style={styles.catEmojiBadge}>
-                    <Text style={{ fontSize: 10 }}>{cat.emoji}</Text>
+                <View
+                  style={[
+                    styles.catIconBox4Col,
+                    {
+                      backgroundColor: cat.bgColor || '#F0FDF4',
+                      borderColor: cat.color ? `${cat.color}40` : '#DCFCE7',
+                    },
+                  ]}
+                >
+                  <Image source={{ uri: cat.image }} style={styles.catThumbnail4Col} />
+                  <View style={styles.catEmojiBadgeFloat}>
+                    <Text style={{ fontSize: 11 }}>{cat.emoji}</Text>
                   </View>
                 </View>
-                <View style={styles.catTextWrapper}>
-                  <Text style={styles.categoryCardName} numberOfLines={2}>
-                    {getCategoryName(cat)}
-                  </Text>
-                  <View style={styles.catCountBadge}>
-                    <Text style={styles.categoryCardCount}>
-                      {cat.count} {language === 'hi' ? 'उपलब्ध' : language === 'mr' ? 'उपलब्ध' : 'Items'}
-                    </Text>
-                  </View>
-                </View>
-                <Ionicons name="chevron-forward" size={11} color="#CBD5E1" />
+                <Text style={styles.categoryCardName4Col} numberOfLines={2}>
+                  {getCategoryName(cat)}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
+
+          {/* Dedicated "See All / See Less" Expandable Action Button */}
+          <TouchableOpacity
+            style={[styles.seeAllCategoriesBar, showAllCategories && styles.seeLessCategoriesBar]}
+            onPress={() => setShowAllCategories(prev => !prev)}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name={showAllCategories ? 'chevron-up-circle' : 'apps'}
+              size={15}
+              color={showAllCategories ? '#475569' : '#15803D'}
+            />
+            <Text style={[styles.seeAllCategoriesBarText, showAllCategories && styles.seeLessCategoriesBarText]}>
+              {showAllCategories
+                ? (language === 'hi'
+                    ? 'कम श्रेणियां दिखाएं (See Less)'
+                    : language === 'mr'
+                    ? 'कमी वर्गवारी दाखवा (See Less)'
+                    : 'See Less Categories')
+                : (language === 'hi'
+                    ? `सभी ${CATEGORIES_DATA.length} श्रेणियां देखें (See All)`
+                    : language === 'mr'
+                    ? `सर्व ${CATEGORIES_DATA.length} वर्गवारी पहा (See All)`
+                    : `See All ${CATEGORIES_DATA.length} Categories`)}
+            </Text>
+            <Ionicons
+              name={showAllCategories ? 'chevron-up' : 'chevron-down'}
+              size={14}
+              color={showAllCategories ? '#475569' : '#15803D'}
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* 3. POPULAR FARM PRODUCTS */}
+        {/* 2. POPULAR FARM PRODUCTS */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <View>
@@ -269,14 +232,14 @@ export const HomeScreen: React.FC = () => {
                     </Text>
                   </View>
 
-                  {/* Compact Add to Cart Button */}
+                  {/* Direct Contact Button */}
                   <TouchableOpacity
-                    style={styles.cartActionBtnFull}
-                    onPress={() => handleAddToCart(prod)}
+                    style={styles.contactActionBtnFull}
+                    onPress={() => openContactModal(prod)}
                     activeOpacity={0.78}
                   >
-                    <Ionicons name="cart-outline" size={13} color="#FFFFFF" />
-                    <Text style={styles.cartActionBtnTextFull}>{t('addToCart')}</Text>
+                    <Ionicons name="call" size={12} color="#FFFFFF" />
+                    <Text style={styles.contactActionBtnTextFull}>{t('callFarmer')}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -336,39 +299,19 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     fontWeight: '800',
   },
-  quickServicesGrid: {
-    flexDirection: 'row',
-    gap: 7,
-    paddingHorizontal: 14,
+  categoriesSectionCard: {
     marginTop: 10,
-  },
-  quickServiceCard: {
-    flex: 1,
-    borderRadius: 12,
-    padding: 7,
-    alignItems: 'center',
+    marginHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 12,
     borderWidth: 1,
-  },
-  quickServiceIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 3,
-  },
-  quickServiceTitle: {
-    fontSize: 10.5,
-    fontWeight: '800',
-    color: '#111827',
-    textAlign: 'center',
-    lineHeight: 13,
-  },
-  quickServiceSub: {
-    fontSize: 9,
-    color: '#6B7280',
-    marginTop: 1,
-    textAlign: 'center',
+    borderColor: '#E8EDEB',
+    elevation: 2,
+    shadowColor: '#15803D',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
   },
   sectionContainer: {
     marginTop: 15,
@@ -377,13 +320,24 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginBottom: 9,
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
   sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  catCountTotalBadge: {
+    backgroundColor: '#DCFCE7',
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 10,
+  },
+  catCountTotalText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#15803D',
   },
   sectionIconBadgeGreen: {
     width: 26,
@@ -408,90 +362,107 @@ const styles = StyleSheet.create({
     letterSpacing: -0.2,
   },
   sectionSubHeading: {
-    fontSize: 10.5,
+    fontSize: 10,
     color: '#6B7280',
     marginTop: 2,
   },
   viewAllBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
-    paddingVertical: 2,
+    gap: 3,
+    paddingVertical: 3.5,
+    paddingHorizontal: 8,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 8,
+    borderWidth: 0.8,
+    borderColor: '#DCFCE7',
   },
   viewAllText: {
-    fontSize: 11.5,
+    fontSize: 11,
     fontWeight: '800',
     color: '#16A34A',
   },
-  categoriesGrid: {
+  viewLessBtn: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#E2E8F0',
+  },
+  viewLessText: {
+    color: '#475569',
+  },
+  categoriesGrid4Col: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    rowGap: 6,
+    justifyContent: 'flex-start',
+    rowGap: 14,
+    columnGap: '2.6%',
   },
-  categoryCardCompact: {
-    width: '48.5%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    paddingVertical: 5,
-    paddingHorizontal: 6,
-    flexDirection: 'row',
+  categoryCard4Col: {
+    width: '23%',
     alignItems: 'center',
-    gap: 6,
+  },
+  catIconBox4Col: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    marginBottom: 5,
+  },
+  catThumbnail4Col: {
+    width: 50,
+    height: 50,
+    borderRadius: 13,
+  },
+  catEmojiBadgeFloat: {
+    position: 'absolute',
+    bottom: -3,
+    right: -3,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    paddingHorizontal: 2.5,
+    paddingVertical: 0.5,
+    elevation: 2,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    elevation: 1.5,
-    shadowColor: '#15803D',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.12,
     shadowRadius: 2,
   },
-  catImgWrapper: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    position: 'relative',
-    backgroundColor: '#F3F4F6',
-  },
-  catThumbnail: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-  },
-  catEmojiBadge: {
-    position: 'absolute',
-    bottom: -2,
-    right: -2,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 6,
-    paddingHorizontal: 1.5,
-    paddingVertical: 0,
-    elevation: 1.5,
-    borderWidth: 0.8,
-    borderColor: '#E5E7EB',
-  },
-  catTextWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  categoryCardName: {
+  categoryCardName4Col: {
     fontSize: 10.5,
-    fontWeight: '800',
-    color: '#0F172A',
-    lineHeight: 13,
-  },
-  catCountBadge: {
-    backgroundColor: '#F0FDF4',
-    paddingHorizontal: 4,
-    paddingVertical: 1,
-    borderRadius: 4,
-    alignSelf: 'flex-start',
-    marginTop: 1.5,
-  },
-  categoryCardCount: {
-    fontSize: 8.5,
-    color: '#15803D',
     fontWeight: '700',
+    color: '#0F172A',
+    textAlign: 'center',
+    lineHeight: 13,
+    height: 26,
+  },
+  seeAllCategoriesBar: {
+    marginTop: 12,
+    backgroundColor: '#F0FDF4',
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    borderRadius: 10,
+    paddingVertical: 8.5,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  seeAllCategoriesBarText: {
+    fontSize: 11.5,
+    fontWeight: '800',
+    color: '#15803D',
+  },
+  seeLessCategoriesBar: {
+    backgroundColor: '#F8FAFC',
+    borderColor: '#E2E8F0',
+  },
+  seeLessCategoriesBarText: {
+    color: '#475569',
   },
   productsGrid: {
     flexDirection: 'row',
@@ -596,16 +567,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     flex: 1,
   },
-  cartActionBtnFull: {
+  contactActionBtnFull: {
     backgroundColor: '#16A34A',
     paddingVertical: 5.5,
     borderRadius: 7,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: 4,
   },
-  cartActionBtnTextFull: {
+  contactActionBtnTextFull: {
     fontSize: 10,
     fontWeight: '800',
     color: '#FFFFFF',

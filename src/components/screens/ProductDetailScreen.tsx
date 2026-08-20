@@ -20,8 +20,7 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ produc
     navigateTo,
     isProductSaved,
     toggleSaveProduct,
-    openContactModal,
-    addToCart
+    openContactModal
   } = useMarketplace();
 
   const [activeImgIdx, setActiveImgIdx] = useState(0);
@@ -283,18 +282,6 @@ export const ProductDetailScreen: React.FC<ProductDetailScreenProps> = ({ produc
 
       {/* Sticky Bottom Direct Contact Actions */}
       <View style={styles.stickyDock}>
-        <TouchableOpacity
-          style={styles.dockCartBtn}
-          onPress={() => {
-            addToCart(product, 1);
-            navigateTo({ name: 'cart' });
-          }}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="cart-outline" size={18} color="#15803D" />
-          <Text style={styles.dockCartBtnText}>{t('buyNow')}</Text>
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.dockCallBtn} onPress={handleCall} activeOpacity={0.85}>
           <Ionicons name="call" size={17} color="#FFFFFF" />
           <Text style={styles.dockBtnText}>{t('callFarmer')}</Text>
@@ -651,23 +638,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  dockCartBtn: {
-    backgroundColor: '#DCFCE7',
-    borderWidth: 1.5,
-    borderColor: '#15803D',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  dockCartBtnText: {
-    color: '#15803D',
-    fontSize: 12.5,
-    fontWeight: '800',
   },
   dockCallBtn: {
     flex: 1,
